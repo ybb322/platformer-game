@@ -25,6 +25,8 @@ export class GamePageComponent {
 
   skyTilingSprite!: PIXI.TilingSprite;
 
+  person!: PIXI.Sprite;
+
   constructor() {
     this.init()
   }
@@ -33,10 +35,11 @@ export class GamePageComponent {
     this.app = new PIXI.Application<HTMLCanvasElement>({width: 800, height: 600})
     document.body.appendChild(this.app.view)
     this.ticker = PIXI.Ticker.shared;
-    this.createTextures()
+    this.handleTextures()
+    this.handlePerson()
   }
 
-  createTextures() {
+  handleTextures() {
     this.groundTexture = PIXI.Texture.from("../../../assets/ground.png");
     this.skyTexture = PIXI.Texture.from("../../../assets/sky.png");
     this.groundTilingSprite = new PIXI.TilingSprite(
@@ -45,17 +48,20 @@ export class GamePageComponent {
     this.skyTilingSprite = new PIXI.TilingSprite(
       this.skyTexture, this.app.screen.width, this.app.screen.height
     )
+    this.person = PIXI.Sprite.from('../../../assets/person.png');
     this.app.stage.addChild(this.skyTilingSprite, this.groundTilingSprite)
-    console.log(this.skyTilingSprite.tilePosition)
+
     this.ticker.add(() => {
       this.groundTilingSprite.tilePosition.x -= 1;
       this.skyTilingSprite.tilePosition.x -= 0.2;
     })
   }
 
-  animateEnvironment() {
-    this.groundTilingSprite.tilePosition.x -= 1;
-    this.skyTilingSprite.tilePosition.x -= 0.2;
+  handlePerson() {
+    this.person = PIXI.Sprite.from("../../../assets/person.png");
+    this.app.stage.addChild(this.person)
+    this.person.y = 75;
+    this.person.x = -200;
   }
 
 }
