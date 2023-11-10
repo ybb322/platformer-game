@@ -1,7 +1,7 @@
 import {AfterViewChecked, Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import * as PIXI from 'pixi.js'
-
+import * as TWEEN from '@tweenjs/tween.js'
 
 @Component({
   selector: 'app-game-page',
@@ -26,6 +26,10 @@ export class GamePageComponent {
   skyTilingSprite!: PIXI.TilingSprite;
 
   person!: PIXI.Sprite;
+
+  jumpTween!: TWEEN.Tween<PIXI.ObservablePoint<any>>
+
+  landTween!: TWEEN.Tween<PIXI.ObservablePoint<any>>
 
   constructor() {
     this.init()
@@ -62,6 +66,21 @@ export class GamePageComponent {
     this.app.stage.addChild(this.person)
     this.person.y = 75;
     this.person.x = -200;
+    this.jumpTween = new TWEEN.Tween(this.person.position).to({y: -20}, 350).easing(TWEEN.Easing.Quadratic.Out);
+    this.landTween = new TWEEN.Tween(this.person.position).to({y: 75}, 350).easing(TWEEN.Easing.Quadratic.In);
+    this.jumpTween.chain(this.landTween);
+    document.addEventListener('keyup', event => {
+      if (event.code === 'Space') {
+        this.jump()
+      }
+    })
   }
 
+  jump() {
+    this.jumpTween.start()
+    this.ticker.add(() => {
+      this.jumpTween.update()
+      this.landTween.update()
+    })
+  }
 }
