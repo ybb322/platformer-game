@@ -40,7 +40,7 @@ export class GamePageComponent {
   }
 
   init() {
-    this.app = new PIXI.Application<HTMLCanvasElement>({width: 800, height: 600})
+    this.app = new PIXI.Application<HTMLCanvasElement>({width: 1000, height: 600})
     document.body.appendChild(this.app.view)
     this.ticker = PIXI.Ticker.shared;
     this.handleTextures()
@@ -65,36 +65,11 @@ export class GamePageComponent {
     })
   }
 
-  handlePerson() {
-    this.person = PIXI.Sprite.from("../../../assets/person.png");
-    this.app.stage.addChild(this.person)
-    this.person.y = 75;
-    this.person.x = -200;
-    // this.jumpTween = new TWEEN.Tween(this.person.position).to({y: -20}, 350).easing(TWEEN.Easing.Quadratic.Out);
-    // this.landTween = new TWEEN.Tween(this.person.position).to({y: 75}, 350).easing(TWEEN.Easing.Quadratic.In);
-    // this.jumpTween.chain(this.landTween);
-
-    const jumping = () => {
-      console.log('jumping!')
-      this.jumpTween.update()
-      this.landTween.update()
-      this.landTween.onComplete(() => {
-        console.log('removed!')
-        this.ticker.remove(jumping)
-      })
-    }
-
-    document.addEventListener('keyup', event => {
-      if (event.code === 'Space') {
-        this.jumpTween.start()
-        this.ticker.add(jumping)
-      }
-    })
-  }
 
   handleCorgi() {
     const corgiRunningTextureOne = PIXI.Texture.from('../../../assets/corgi_running_1.png')
     const corgiRunningTextureTwo = PIXI.Texture.from('../../../assets/corgi_running_2.png')
+    const corgiJumpingTexture = PIXI.Texture.from('../../../assets/corgi_jumping_1.png')
     this.corgiRunningTexture = corgiRunningTextureOne;
     this.corgi = PIXI.Sprite.from(this.corgiRunningTexture)
     this.app.stage.addChild(this.corgi)
@@ -106,28 +81,69 @@ export class GamePageComponent {
     this.jumpTween.chain(this.landTween);
 
     const jumping = () => {
-      console.log('jumping!')
+      this.corgi.texture = corgiJumpingTexture;
       this.jumpTween.update()
       this.landTween.update()
       this.landTween.onComplete(() => {
-        console.log('removed!')
+        this.jumpTween.stop()
+        this.landTween.stop()
         this.ticker.remove(jumping)
+        this.corgi.texture = corgiRunningTextureOne;
       })
     }
 
-    document.addEventListener('keyup', event => {
+    const walkingForward = () => {
+      this.corgi.x += 1;
+    }
+
+    const walkingBackward = () => {
+      this.corgi.x -= 1;
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.repeat) {
+        return;
+      }
+      if (event.code === 'Space' && this.jumpTween.isPlaying()) {
+        return;
+      }
       if (event.code === 'Space') {
         this.jumpTween.start()
         this.ticker.add(jumping)
+        return;
+      }
+      if (event.code === 'KeyD') {
+        this.ticker.remove(walkingForward)
+        this.ticker.add(walkingForward)
+        return;
+      }
+      if (event.code === 'KeyA') {
+        this.ticker.remove(walkingBackward)
+        this.ticker.add(walkingBackward)
+        return;
+      }
+    })
+
+    document.addEventListener('keyup', event => {
+      if (event.repeat) {
+        return;
+      }
+      if (event.code === 'KeyD') {
+        this.ticker.remove(walkingForward)
+      }
+      if (event.code === 'KeyD') {
+        this.ticker.remove(walkingForward)
+      }
+      if (event.code === 'KeyA') {
+        this.ticker.remove(walkingBackward)
       }
     })
 
 
     setInterval(() => {
-      console.log(this.corgiRunningTexture.textureCacheIds)
       if (this.corgi.texture === corgiRunningTextureOne) {
         this.corgi.texture = corgiRunningTextureTwo
-      } else {
+      } else if (this.corgi.texture === corgiRunningTextureTwo) {
         this.corgi.texture = corgiRunningTextureOne
       }
     }, 150)
