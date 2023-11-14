@@ -33,6 +33,8 @@ export class GamePageComponent {
 
   corgi!: PIXI.Sprite;
 
+  bone!: PIXI.Sprite;
+
   corgiRunningTexture!: PIXI.Texture;
 
   constructor() {
@@ -44,7 +46,7 @@ export class GamePageComponent {
     document.body.appendChild(this.app.view)
     this.ticker = PIXI.Ticker.shared;
     this.handleTextures()
-    this.handleCorgi()
+    this.handleSprites()
   }
 
   handleTextures() {
@@ -66,7 +68,7 @@ export class GamePageComponent {
   }
 
 
-  handleCorgi() {
+  handleSprites() {
     const corgiRunningTextureOne = PIXI.Texture.from('../../../assets/corgi_running_1.png')
     const corgiRunningTextureTwo = PIXI.Texture.from('../../../assets/corgi_running_2.png')
     const corgiJumpingTexture = PIXI.Texture.from('../../../assets/corgi_jumping_1.png')
@@ -76,9 +78,36 @@ export class GamePageComponent {
     this.corgi.y = 400;
     this.corgi.x = 50;
 
+    this.bone = PIXI.Sprite.from('../../../assets/bone_1.png')
+    this.bone.x = 1000;
+    this.bone.y = 350;
+    this.app.stage.addChild(this.bone)
+
+    const boneMoving = () => {
+      this.bone.x -= 1.5;
+    }
+
+    this.ticker.add(() => {
+      console.log(this.bone.x)
+      boneMoving()
+      const bounds1 = this.corgi.getBounds();
+      const bounds2 = this.bone.getBounds();
+
+      const collided = bounds1.x < bounds2.x + bounds2.width
+        && bounds1.x + bounds1.width > bounds2.x
+        && bounds1.y < bounds2.y + bounds2.height
+        && bounds1.y + bounds1.height > bounds2.y;
+
+      if (collided) {
+        this.bone.x = 1000
+      }
+    })
+
+
     this.jumpTween = new TWEEN.Tween(this.corgi.position).to({y: 320}, 350).easing(TWEEN.Easing.Quadratic.Out);
     this.landTween = new TWEEN.Tween(this.corgi.position).to({y: 400}, 350).easing(TWEEN.Easing.Quadratic.In);
     this.jumpTween.chain(this.landTween);
+
 
     const jumping = () => {
       this.corgi.texture = corgiJumpingTexture;
@@ -101,6 +130,7 @@ export class GamePageComponent {
     }
 
     document.addEventListener('keydown', event => {
+      event.preventDefault()
       if (event.repeat) {
         return;
       }
@@ -147,7 +177,6 @@ export class GamePageComponent {
         this.corgi.texture = corgiRunningTextureOne
       }
     }, 150)
-
 
   }
 
