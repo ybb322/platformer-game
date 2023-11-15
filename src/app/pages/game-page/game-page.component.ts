@@ -77,17 +77,17 @@ export class GamePageComponent {
     this.corgi.x = 50;
 
     const bone = PIXI.Sprite.from('../../../assets/bone_1.png')
-    let randomBoneSpeed = Math.floor(Math.random() * 5) + 3;
+    let randomBoneSpeed = Math.floor(Math.random() * 5) + 2;
     let randomBonePosX = Math.floor(Math.random() * (1200 - 1000 + 1)) + 1000;
     let randomBonePosY = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
-    let boneFlyoverPositions = [450, 400, 350, 320];
+    let boneFlyoverPositions = [500, 450, 400, 350, 320];
     let randomIndex = Math.floor(Math.random() * boneFlyoverPositions.length);
     let randomFlyoverPosition = boneFlyoverPositions[randomIndex]
     bone.x = randomBonePosX;
     bone.y = randomBonePosY;
 
 
-    let boneFlyoverTween = new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1550).easing(TWEEN.Easing.Quadratic.Out);
+    let boneFlyoverTween = new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1500).easing(TWEEN.Easing.Quadratic.Out);
 
     this.app.stage.addChild(bone)
     const boneMoving = (speedX: number) => {
@@ -112,10 +112,10 @@ export class GamePageComponent {
     })
 
     const createNewBone = () => {
-      randomBoneSpeed = Math.floor(Math.random() * 5) + 3;
+      randomBoneSpeed = Math.floor(Math.random() * 5) + 2;
       randomBonePosY = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
       boneFlyoverTween =
-        new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1000).easing(TWEEN.Easing.Quadratic.Out)
+        new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1500).easing(TWEEN.Easing.Quadratic.Out)
       randomIndex = Math.floor(Math.random() * boneFlyoverPositions.length);
       randomFlyoverPosition = boneFlyoverPositions[randomIndex]
       bone.y = randomBonePosY;
@@ -124,8 +124,8 @@ export class GamePageComponent {
     }
 
 
-    this.jumpTween = new TWEEN.Tween(this.corgi.position).to({y: 320}, 350).easing(TWEEN.Easing.Quadratic.Out);
-    this.landTween = new TWEEN.Tween(this.corgi.position).to({y: 400}, 350).easing(TWEEN.Easing.Quadratic.In);
+    this.jumpTween = new TWEEN.Tween(this.corgi.position).to({y: this.corgi.y - 100}, 350).easing(TWEEN.Easing.Quadratic.Out);
+    this.landTween = new TWEEN.Tween(this.corgi.position).to({y: this.corgi.y}, 350).easing(TWEEN.Easing.Quadratic.In);
     this.jumpTween.chain(this.landTween);
 
 
@@ -143,22 +143,46 @@ export class GamePageComponent {
 
     const walkingForward = () => {
       this.corgi.x += 1.5;
+      if (this.corgi.x >= 880) {
+        this.corgi.x = 880;
+      }
     }
 
     const walkingBackward = () => {
       this.corgi.x -= 1.5;
+      if (this.corgi.x <= 0) {
+        this.corgi.x = 0;
+      }
     }
+
+    const walkingDown = () => {
+      this.corgi.y += 1.5;
+      if (this.corgi.y >= 500) {
+        this.corgi.y = 500;
+      }
+    }
+
+    const walkingUp = () => {
+      this.corgi.y -= 1.5;
+      if (this.corgi.y <= 380 && (!this.jumpTween.isPlaying() && !this.landTween.isPlaying())) {
+        this.corgi.y = 380;
+      }
+    }
+
 
     document.addEventListener('keydown', event => {
       if (event.repeat) {
         return;
       }
-      if (event.code === 'Space' && this.jumpTween.isPlaying()) {
+      if (event.code === 'Space' && (this.jumpTween.isPlaying() || this.landTween.isPlaying())) {
         event.preventDefault()
         return;
       }
       if (event.code === 'Space') {
         event.preventDefault()
+        this.jumpTween = new TWEEN.Tween(this.corgi.position).to({y: this.corgi.y - 100}, 350).easing(TWEEN.Easing.Quadratic.Out);
+        this.landTween = new TWEEN.Tween(this.corgi.position).to({y: this.corgi.y}, 350).easing(TWEEN.Easing.Quadratic.In);
+        this.jumpTween.chain(this.landTween);
         this.jumpTween.start()
         this.ticker.add(jumping)
         return;
@@ -171,6 +195,22 @@ export class GamePageComponent {
       if (event.code === 'KeyA') {
         this.ticker.remove(walkingBackward)
         this.ticker.add(walkingBackward)
+        return;
+      }
+      if (event.code === 'KeyS') {
+        this.ticker.remove(walkingUp)
+        this.ticker.add(walkingDown)
+        return;
+      }
+      if (event.code === 'KeyS' && this.jumpTween.isPlaying()) {
+        return;
+      }
+      if (event.code === 'KeyW' && this.jumpTween.isPlaying()) {
+        return;
+      }
+      if (event.code === 'KeyW') {
+        this.ticker.remove(walkingDown)
+        this.ticker.add(walkingUp)
         return;
       }
     })
@@ -187,6 +227,12 @@ export class GamePageComponent {
       }
       if (event.code === 'KeyA') {
         this.ticker.remove(walkingBackward)
+      }
+      if (event.code === 'KeyS') {
+        this.ticker.remove(walkingDown)
+      }
+      if (event.code === 'KeyW') {
+        this.ticker.remove(walkingUp)
       }
     })
 
