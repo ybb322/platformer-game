@@ -33,8 +33,6 @@ export class GamePageComponent {
 
   corgi!: PIXI.Sprite;
 
-  bone!: PIXI.Sprite;
-
   corgiRunningTexture!: PIXI.Texture;
 
   constructor() {
@@ -78,30 +76,38 @@ export class GamePageComponent {
     this.corgi.y = 400;
     this.corgi.x = 50;
 
-    this.bone = PIXI.Sprite.from('../../../assets/bone_1.png')
-    this.bone.x = 1000;
-    this.bone.y = 350;
-    this.app.stage.addChild(this.bone)
+    const bone = PIXI.Sprite.from('../../../assets/bone_1.png')
+    let randomBoneSpeed = Math.floor(Math.random() * 5) + 2;
+    let randomBonePosX = Math.floor(Math.random() * (1200 - 1000 + 1)) + 1000;
+    bone.x = randomBonePosX;
+    bone.y = 400;
 
-    const boneMoving = () => {
-      this.bone.x -= 1.5;
+    this.app.stage.addChild(bone)
+    const boneMoving = (speedX: number) => {
+      console.log(randomBoneSpeed)
+      bone.x -= randomBoneSpeed;
     }
 
     this.ticker.add(() => {
-      console.log(this.bone.x)
-      boneMoving()
+      console.log(bone.x)
+      boneMoving(randomBoneSpeed)
       const bounds1 = this.corgi.getBounds();
-      const bounds2 = this.bone.getBounds();
+      const bounds2 = bone.getBounds();
 
       const collided = bounds1.x < bounds2.x + bounds2.width
         && bounds1.x + bounds1.width > bounds2.x
         && bounds1.y < bounds2.y + bounds2.height
         && bounds1.y + bounds1.height > bounds2.y;
 
-      if (collided) {
-        this.bone.x = 1000
+      if (collided || bone.x < -200) {
+        createNewBone()
       }
     })
+
+    const createNewBone = () => {
+      bone.x = randomBonePosX
+      randomBoneSpeed = Math.floor(Math.random() * 5) + 2;
+    }
 
 
     this.jumpTween = new TWEEN.Tween(this.corgi.position).to({y: 320}, 350).easing(TWEEN.Easing.Quadratic.Out);
@@ -122,22 +128,23 @@ export class GamePageComponent {
     }
 
     const walkingForward = () => {
-      this.corgi.x += 1;
+      this.corgi.x += 1.5;
     }
 
     const walkingBackward = () => {
-      this.corgi.x -= 1;
+      this.corgi.x -= 1.5;
     }
 
     document.addEventListener('keydown', event => {
-      event.preventDefault()
       if (event.repeat) {
         return;
       }
       if (event.code === 'Space' && this.jumpTween.isPlaying()) {
+        event.preventDefault()
         return;
       }
       if (event.code === 'Space') {
+        event.preventDefault()
         this.jumpTween.start()
         this.ticker.add(jumping)
         return;
