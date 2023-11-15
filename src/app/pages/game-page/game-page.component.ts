@@ -77,7 +77,7 @@ export class GamePageComponent {
     this.corgi.x = 50;
 
     const bone = PIXI.Sprite.from('../../../assets/bone_1.png')
-    let randomBoneSpeed = Math.floor(Math.random() * 5) + 2;
+    let randomBoneSpeed = Math.floor(Math.random() * 5) + 3;
     let randomBonePosX = Math.floor(Math.random() * (1200 - 1000 + 1)) + 1000;
     let randomBonePosY = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
     let boneFlyoverPositions = [450, 400, 350, 320];
@@ -88,7 +88,6 @@ export class GamePageComponent {
 
 
     let boneFlyoverTween = new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1550).easing(TWEEN.Easing.Quadratic.Out);
-
 
     this.app.stage.addChild(bone)
     const boneMoving = (speedX: number) => {
@@ -113,16 +112,15 @@ export class GamePageComponent {
     })
 
     const createNewBone = () => {
-      randomBoneSpeed = Math.floor(Math.random() * 5) + 2;
+      randomBoneSpeed = Math.floor(Math.random() * 5) + 3;
       randomBonePosY = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
-      boneFlyoverTween = new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1550).easing(TWEEN.Easing.Quadratic.Out)
+      boneFlyoverTween =
+        new TWEEN.Tween(bone.position).to({y: randomFlyoverPosition}, 1000).easing(TWEEN.Easing.Quadratic.Out)
       randomIndex = Math.floor(Math.random() * boneFlyoverPositions.length);
       randomFlyoverPosition = boneFlyoverPositions[randomIndex]
       bone.y = randomBonePosY;
       bone.x = randomBonePosX
       boneFlyoverTween.start()
-      console.log(randomBonePosY)
-      console.log(bone.y)
     }
 
 
